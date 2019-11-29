@@ -88,9 +88,7 @@ module Onfido
     def handle_api_error(response)
       parsed_response = parse(response)
 
-      unless parsed_response["error"]
-        general_api_error(response.code, response.body)
-      end
+      general_api_error(response.code, response.body) unless parsed_response["error"]
 
       error_class = response.code.to_i >= 500 ? ServerError : RequestError
 
@@ -145,6 +143,13 @@ module Onfido
       full_message = message + "\n\n(Network error: #{error.message})"
 
       raise ConnectionError.new(full_message)
+    end
+
+    def validate_file!(file)
+      return if file.respond_to?(:read) && file.respond_to?(:path)
+
+      raise ArgumentError, "File must be a `File`-like object which responds to " \
+                           "`#read` and `#path`"
     end
   end
 end

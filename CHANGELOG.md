@@ -1,3 +1,42 @@
+## v0.15.0, 4 Feb 2019
+
+- Add Check#find_by_url method (@ctrlaltdylan)
+
+## v0.14.0, 28 Jan 2019
+
+- Add support for applicant deletion and restore endpoints
+
+## v0.13.0, 5 Nov 2018
+
+- Add support for region-specific environments (@stephencookdev)
+
+## v0.12.0, 29 May 2018
+
+- Add support for the Live Video resource (#55) (@Intrepidd)
+
+## v0.11.0, 18 April 2018
+
+- Automatically detect the correct Onfido API region to use based on the provided API
+key (#49) (@tpinto)
+
+## v0.10.0, 3 April 2018
+
+- Add support for download, find and retrieve all for live_photo resource (@kirsis)
+
+## v0.9.0, 8 March 2018
+
+- Remove the ability to create Documents and Live Photos from a remote URL or local path, mitigating a potential security vulnerability (see #45 for details) (@timrogers)
+- Drop support for Ruby versions earlier than 2.2.0, since they have [reached end-of-life](https://www.ruby-lang.org/en/news/2017/04/01/support-of-ruby-2-1-has-ended/) (@timrogers)
+
+## v0.8.4, 29 January 2018
+
+- Replace use of `method_missing` with explicitly-defined accessors when accessing
+resources from an `Onfido::API` instance (@hmac)
+
+## v0.8.3, 16 January 2018
+
+- Add support for `Onfido::SdkToken` resource (@robotmay)
+
 ## v0.8.2, 21 April 2017
 
 - Relax [Rack](https://github.com/rack/rack) dependency to allow all versions where `Rack::Utils.secure_compare` is available (@metade)

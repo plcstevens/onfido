@@ -2,13 +2,11 @@
 
 AllCops:
   DisplayCopNames: true
-  Include:
-    - Rakefile
-    - lib/tasks/*.rake
   Exclude:
     - vendor/**/*
     - .*/**
     - spec/fixtures/**/*
+  TargetRubyVersion: 2.2.0
 
 Style/StringLiterals:
   Enabled: false
@@ -22,7 +20,7 @@ Style/Documentation:
 Style/SignalException:
   EnforcedStyle: only_raise
 
-Style/FileName:
+Naming/FileName:
   Exclude:
     - Gemfile
 
@@ -53,3 +51,7 @@ Layout/DotPosition:
 # Allow class and message or instance raises
 Style/RaiseArgs:
   Enabled: false
+
+Lint/AmbiguousBlockAssociation:
+  Exclude:
+    - "spec/**/*"

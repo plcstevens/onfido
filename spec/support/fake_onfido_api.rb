@@ -26,6 +26,14 @@ class FakeOnfidoAPI < Sinatra::Base
     status 204
   end
 
+  post '/v2/applicants/:id/restore' do
+    if params["id"] == "a2fb9c62-ab10-4898-a8ec-342c4b552ad5"
+      json_response(422, 'not_scheduled_for_deletion_error.json')
+    else
+      status 204
+    end
+  end
+
   post '/v2/applicants/:id/documents' do
     json_response(201, 'document.json')
   end
@@ -46,6 +54,58 @@ class FakeOnfidoAPI < Sinatra::Base
 
   post '/v2/live_photos' do
     json_response(201, 'live_photo.json')
+  end
+
+  get '/v2/live_photos/:id' do
+    if params["applicant_id"] != "1030303-123123-123123"
+      status 404
+    else
+      json_response(200, 'live_photo.json')
+    end
+  end
+
+  get '/v2/live_photos' do
+    if params["applicant_id"] != "1030303-123123-123123"
+      status 404
+    else
+      json_response(200, 'live_photos.json')
+    end
+  end
+
+  get '/v2/live_photos/:id/download' do
+    if params["applicant_id"] != "1030303-123123-123123"
+      status 404
+    else
+      status 200
+      content_type 'image/jpeg'
+      "\x01\x02\x03" # acts as binary file data
+    end
+  end
+
+  get '/v2/live_videos/:id' do
+    if params["applicant_id"] != "1030303-123123-123123"
+      status 404
+    else
+      json_response(200, 'live_video.json')
+    end
+  end
+
+  get '/v2/live_videos' do
+    if params["applicant_id"] != "1030303-123123-123123"
+      status 404
+    else
+      json_response(200, 'live_videos.json')
+    end
+  end
+
+  get '/v2/live_videos/:id/download' do
+    if params["applicant_id"] != "1030303-123123-123123"
+      status 404
+    else
+      status 200
+      content_type 'video/quicktime'
+      "\x01\x02\x03" # acts as binary file data
+    end
   end
 
   post '/v2/applicants/:id/checks' do
@@ -96,6 +156,10 @@ class FakeOnfidoAPI < Sinatra::Base
 
   get '/v2/report_type_groups' do
     json_response(200, 'report_type_groups.json')
+  end
+
+  post '/v2/sdk_token' do
+    json_response(201, 'sdk_token.json')
   end
 
   post '/v2/webhooks' do

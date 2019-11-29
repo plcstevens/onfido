@@ -12,12 +12,14 @@ This gem supports both `v1` and `v2` of the Onfido API. Refer to Onfido's [API d
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'onfido', '~> 0.8.2'
+gem 'onfido', '~> 0.15.0'
 ```
+
+The gem is compatible with Ruby 2.2.0 and onwards. Earlier versions of Ruby have [reached end-of-life](https://www.ruby-lang.org/en/news/2017/04/01/support-of-ruby-2-1-has-ended/), are no longer supported and no longer receive security fixes.
 
 ## Configuration
 
-There are 5 configuration options:
+There are 6 configuration options:
 
 ```ruby
 Onfido.configure do |config|
@@ -26,8 +28,18 @@ Onfido.configure do |config|
   config.logger = Logger.new(STDOUT)
   config.open_timeout = 30
   config.read_timeout = 80
+  config.region = nil
 end
 ```
+
+### Regions
+
+The gem will use the default region if no region is specified.
+
+To specify the US region do:
+`config.region = :us`
+
+See https://documentation.onfido.com/#regions for supported regions.
 
 ## Usage
 
@@ -56,10 +68,14 @@ Applicants are the object upon which Onfido checks are performed.
 ```ruby
 api.applicant.create(params)                  # => Creates an applicant
 api.applicant.update('applicant_id', params)  # => Updates an applicant
-api.applicant.destroy('applicant_id')         # => Destroy an applicant
+api.applicant.destroy('applicant_id')         # => Schedule an applicant for deletion
+api.applicant.restore('applicant_id')         # => Restore an applicant scheduled for deletion
 api.applicant.find('applicant_id')            # => Finds a single applicant
 api.applicant.all                             # => Returns all applicants
 ```
+
+**Note:** Calling `api.applicant.destroy` adds the applicant and all associated documents, photos, videos, checks, and reports to the deletion queue. They will be deleted 20 days after the request is made. An applicant that is scheduled for deletion can be restored but applicants that have been permanently deleted cannot.
+See https://documentation.onfido.com/#delete-applicant for more information.
 
 #### Documents
 
@@ -72,18 +88,26 @@ api.document.download('applicant_id', 'document_id') # => Downloads a document a
 api.document.all('applicant_id') # => Returns all applicant's documents
 ```
 
-**Note:** The file parameter can be either a `File` object or a link to an image.
+**Note:** The file parameter must be a `File`-like object which responds to `#read` and `#path`.
+Previous versions of this gem supported providing a URL to a file accessible over HTTP or a path
+to a file in the local filesystem. You should instead load the file yourself and then pass it in
+to `#create`.
 
 #### Live Photos
 
 Live Photos, like documents, can provide supporting evidence for Onfido checks.
-They can only be created - the Onfido does not support finding or listing them.
 
 ```ruby
 api.live_photo.create('applicant_id', file: 'http://example.com')
+api.live_photo.find(applicant_id, live_photo_id) # => Finds a live photo
+api.live_photo.download(applicant_id, live_photo_id) # => Downloads a live photo as binary data
+api.live_photo.all(applicant_id) # => Returns all applicant's live photos
 ```
 
-**Note:** The file parameter can be either a `File` object or a link to an image.
+**Note:** The file parameter must be a `File`-like object which responds to `#read` and `#path`.
+Previous versions of this gem supported providing a URL to a file accessible over HTTP or a path
+to a file in the local filesystem. You should instead load the file yourself and then pass it in
+to `#create`.
 
 #### Checks
 
@@ -93,6 +117,7 @@ more "reports" on them.
 ```ruby
 api.check.create('applicant_id', type: 'express', reports: [{ name: 'identity' }])
 api.check.find('applicant_id', 'check_id')
+api.check.find_by_url('applicants/a90e7a17-677a-49ab-a171-281f96c77bde/checks/c9f41bef-0610-4d2f-9982-ae9387876edc')
 api.check.resume('check_id')
 api.check.all('applicant_id')
 ```
@@ -112,6 +137,7 @@ api.report.cancel('check_id', 'report_id')
 ```
 
 #### Report Type Groups
+
 Report type groups provide a convenient way to group and organize different types of reports.
  The Onfido API only provides support for finding and listing them.
 
@@ -139,6 +165,15 @@ as through the dashboard.
 api.webhook.create(params)          # => Creates a webhook endpoint
 api.webhook.find('webhook_id')      # => Finds a single webhook endpoint
 api.webhook.all                     # => Returns all webhook endpoints
+```
+
+#### SDK Tokens
+
+Onfido allows you to generate JSON Web Tokens via the API in order to authenticate
+with Onfido's [JavaScript SDK](https://github.com/onfido/onfido-sdk-ui).
+
+```ruby
+api.sdk_token.create(applicant_id: 'applicant_id', referrer: 'referrer')
 ```
 
 ### Pagination
@@ -173,7 +208,7 @@ This provided signature [should](https://onfido.com/documentation#webhook-securi
 
 ```ruby
 if Onfido::Webhook.valid?(request.raw_post,
-                          request.headers["X-Signature"],
+                          request.headers["X-SHA2-Signature"],
                           ENV['ONFIDO_WEBHOOK_TOKEN'])
   process_webhook
 else

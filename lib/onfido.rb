@@ -1,7 +1,6 @@
 require 'json'
 require 'rack'
 require 'rest-client'
-require 'open-uri'
 require 'openssl'
 
 require 'onfido/version'
@@ -18,8 +17,10 @@ require 'onfido/resources/applicant'
 require 'onfido/resources/check'
 require 'onfido/resources/document'
 require 'onfido/resources/live_photo'
+require 'onfido/resources/live_video'
 require 'onfido/resources/report'
 require 'onfido/resources/report_type_group'
+require 'onfido/resources/sdk_token'
 require 'onfido/resources/webhook'
 
 module Onfido

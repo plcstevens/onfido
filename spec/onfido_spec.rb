@@ -35,6 +35,28 @@ describe Onfido do
       end
     end
 
+    describe 'using the US region' do
+      it 'should change endpoint' do
+        onfido.region = 'us'
+        expect(onfido.endpoint).to eq('https://api.us.onfido.com/v2/')
+      end
+    end
+
+    describe 'using an unsupported region' do
+      it 'should change endpoint' do
+        onfido.region = 'de'
+        expect { onfido.endpoint }.
+          to raise_error('The region "de" is not currently supported')
+      end
+    end
+
+    describe 'using an old API token' do
+      it 'should use old endpoint' do
+        onfido.api_key = "live_asdfghjkl1234567890qwertyuiop"
+        expect(onfido.endpoint).to eq('https://api.onfido.com/v2/')
+      end
+    end
+
     describe '.logger' do
       context 'when an option is passed' do
         context 'when the option passed behaves like a logger' do
